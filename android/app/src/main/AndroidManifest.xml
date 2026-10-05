@@ -3,7 +3,10 @@
     <application
         android:label="${appName}"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:enableOnBackInvokedCallback="false">
+        <!-- Predictive back is off so every back press reaches Flutter.
+             Needed for the "other tab -> Sessions -> exit" behaviour. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
