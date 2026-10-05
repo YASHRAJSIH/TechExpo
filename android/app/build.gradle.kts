@@ -29,6 +29,21 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            // Different id so dev and prod can be installed side by side.
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appName"] = "TechExpo Dev"
+        }
+        create("prod") {
+            dimension = "environment"
+            manifestPlaceholders["appName"] = "MunichTech EXPO"
+        }
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.

@@ -20,9 +20,10 @@ String _twoDigits(int n) => n.toString().padLeft(2, '0');
 String formatTime(DateTime time) =>
     '${_twoDigits(time.hour)}:${_twoDigits(time.minute)}';
 
-/// `10:30 – 11:15`
-String formatTimeRange(DateTime start, DateTime end) =>
-    '${formatTime(start)} – ${formatTime(end)}';
+/// `10:30 – 11:15`, or `10:30` when there's no end time.
+String formatTimeRange(DateTime start, DateTime? end) => end == null
+    ? formatTime(start)
+    : '${formatTime(start)} – ${formatTime(end)}';
 
 /// `Wed, Oct 14`
 String formatDay(DateTime date) =>

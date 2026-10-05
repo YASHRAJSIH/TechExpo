@@ -1,147 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../cubits/sessions_cubit.dart';
+import '../cubits/sessions_state.dart';
 import '../models/session.dart';
 import '../theme/app_colors.dart';
 import '../utils/date_format.dart';
 import '../widgets/app_header.dart';
 import '../widgets/category_tag.dart';
 import '../widgets/info_pill.dart';
+import '../widgets/message_view.dart';
 import 'session_detail_page.dart';
 
-// Temporary data for the UI. Replaced by the REST API later.
-final _sampleSessions = <Session>[
-  Session(
-    id: '1',
-    title: 'AI Agents: The Next Generation of Software',
-    category: 'Keynote',
-    speaker: 'Anna Müller',
-    speakerRole: 'Principal AI Engineer, TechLabs',
-    speakerBio:
-        'Anna works on intelligent developer platforms and production AI '
-        'systems, with a focus on agentic workflows and human-in-the-loop '
-        'applications.',
-    speakerLocation: 'Munich, Germany',
-    startTime: DateTime(2026, 10, 14, 10, 30),
-    endTime: DateTime(2026, 10, 14, 11, 15),
-    hall: 'Hall A',
-    room: 'Stage 2',
-    venue: 'MunichTech EXPO Center · Ground Floor, East Wing',
-    level: 'Level 0',
-    description:
-        'AI agents are moving from experimental prototypes into production '
-        'systems. This session explores how modern agent architectures work, '
-        'where they deliver real business value, and the engineering '
-        'challenges teams face when deploying reliable autonomous workflows.',
-    tags: ['AgenticAI', 'SystemDesign', 'AutonomousWorkflows', 'EnterpriseAI'],
-  ),
-  Session(
-    id: '2',
-    title: 'Next-Gen Quantum Computing & Cryptography',
-    category: 'Deep Tech',
-    speaker: 'Dr. Lukas Weber',
-    speakerRole: 'Quantum Lead, Max Planck Institute',
-    speakerBio:
-        'Lukas leads applied quantum research and advises industry on '
-        'post-quantum cryptography migration.',
-    speakerLocation: 'Garching, Germany',
-    startTime: DateTime(2026, 10, 14, 11, 30),
-    endTime: DateTime(2026, 10, 14, 12, 15),
-    hall: 'Hall B',
-    room: 'Tech Arena',
-    venue: 'MunichTech EXPO Center · First Floor, North Wing',
-    level: 'Level 1',
-    description:
-        'Where quantum hardware really stands today, and what engineering '
-        'teams should do now to prepare their systems for post-quantum '
-        'cryptography.',
-    tags: ['Quantum', 'Cryptography', 'Security'],
-  ),
-  Session(
-    id: '3',
-    title: 'Scaling Cross-Platform Mobile Architectures',
-    category: 'Engineering',
-    speaker: 'Elena Rostova',
-    speakerRole: 'Principal Engineer, Bavarian Labs',
-    speakerBio:
-        'Elena builds mobile platforms used by millions and maintains '
-        'several open-source Flutter packages.',
-    speakerLocation: 'Berlin, Germany',
-    startTime: DateTime(2026, 10, 14, 13, 0),
-    endTime: DateTime(2026, 10, 14, 13, 45),
-    hall: 'Hall A',
-    room: 'Stage 2',
-    venue: 'MunichTech EXPO Center · Ground Floor, East Wing',
-    level: 'Level 0',
-    description:
-        'Modular architecture, state management and release pipelines for '
-        'cross-platform apps that need to grow with large teams.',
-    tags: ['Flutter', 'Architecture', 'Mobile'],
-  ),
-  Session(
-    id: '4',
-    title: 'Autonomous Robotics & Industrial Automation',
-    category: 'Hardware',
-    speaker: 'Marcus Lindemann',
-    speakerRole: 'Robotics Fellow, TUM',
-    speakerBio:
-        'Marcus researches autonomous systems for manufacturing and '
-        'logistics at the Technical University of Munich.',
-    speakerLocation: 'Munich, Germany',
-    startTime: DateTime(2026, 10, 14, 14, 0),
-    endTime: DateTime(2026, 10, 14, 14, 45),
-    hall: 'Hall C',
-    room: 'Robotics Lab',
-    venue: 'MunichTech EXPO Center · Ground Floor, West Wing',
-    level: 'Level 0',
-    description:
-        'From research lab to factory floor: how autonomous robots are being '
-        'deployed safely alongside human workers.',
-    tags: ['Robotics', 'Automation', 'Industry40'],
-  ),
-  Session(
-    id: '5',
-    title: 'Building Resilient European Tech Ecosystems',
-    category: 'Panel',
-    speaker: 'Dr. Sophie von Berg',
-    speakerRole: 'Founding Partner, Isar Ventures',
-    speakerBio:
-        'Sophie invests in early-stage deep tech companies across Europe.',
-    speakerLocation: 'Munich, Germany',
-    startTime: DateTime(2026, 10, 14, 15, 15),
-    endTime: DateTime(2026, 10, 14, 16, 0),
-    hall: 'Hall A',
-    room: 'Main Stage',
-    venue: 'MunichTech EXPO Center · Ground Floor, East Wing',
-    level: 'Level 0',
-    description:
-        'Founders, investors and policy makers discuss what Europe needs to '
-        'grow and keep its next generation of tech companies.',
-    tags: ['Startups', 'VentureCapital', 'Europe'],
-  ),
-  Session(
-    id: '6',
-    title: 'Green Cloud Computing & Low-Power Datacenters',
-    category: 'Sustainability',
-    speaker: 'Florian Bauer',
-    speakerRole: 'Infrastructure Architect',
-    speakerBio:
-        'Florian designs energy-efficient cloud infrastructure for '
-        'European data centres.',
-    speakerLocation: 'Stuttgart, Germany',
-    startTime: DateTime(2026, 10, 14, 16, 30),
-    endTime: DateTime(2026, 10, 14, 17, 15),
-    hall: 'Hall B',
-    room: 'Stage 1',
-    venue: 'MunichTech EXPO Center · First Floor, North Wing',
-    level: 'Level 1',
-    description:
-        'Practical techniques for cutting the energy use and carbon '
-        'footprint of cloud workloads without hurting performance.',
-    tags: ['GreenTech', 'Cloud', 'Infrastructure'],
-  ),
-];
-
-const _filters = ['All', 'Today', 'Tomorrow', 'Hall A', 'Hall B', 'Hall C'];
+const _allFilter = 'All';
+const _todayFilter = 'Today';
+const _tomorrowFilter = 'Tomorrow';
 
 class SessionsPage extends StatefulWidget {
   const SessionsPage({super.key});
@@ -151,83 +24,195 @@ class SessionsPage extends StatefulWidget {
 }
 
 class _SessionsPageState extends State<SessionsPage> {
-  String _selectedFilter = 'All';
+  String _selectedFilter = _allFilter;
   String _query = '';
 
-  List<Session> get _visibleSessions {
+  /// "All", "Today", "Tomorrow", then one chip per hall in the data.
+  List<String> _filtersFor(List<Session> sessions) {
+    final halls =
+        sessions
+            .map((s) => s.hall)
+            .where((h) => h != Session.fallback)
+            .toSet()
+            .toList()
+          ..sort();
+    return [_allFilter, _todayFilter, _tomorrowFilter, ...halls];
+  }
+
+  bool _matchesFilter(Session session, DateTime now) {
+    switch (_selectedFilter) {
+      case _allFilter:
+        return true;
+      case _todayFilter:
+        return DateUtils.isSameDay(session.startTime, now);
+      case _tomorrowFilter:
+        return DateUtils.isSameDay(
+          session.startTime,
+          now.add(const Duration(days: 1)),
+        );
+      default:
+        return session.hall == _selectedFilter;
+    }
+  }
+
+  List<Session> _visible(List<Session> sessions) {
+    final now = DateTime.now();
     final query = _query.trim().toLowerCase();
-    return _sampleSessions.where((s) {
-      final matchesFilter =
-          !_selectedFilter.startsWith('Hall') || s.hall == _selectedFilter;
+    return sessions.where((s) {
       final matchesQuery =
           query.isEmpty ||
           s.title.toLowerCase().contains(query) ||
-          s.speaker.toLowerCase().contains(query);
-      return matchesFilter && matchesQuery;
+          s.speaker.toLowerCase().contains(query) ||
+          s.category.toLowerCase().contains(query);
+      return matchesQuery && _matchesFilter(s, now);
     }).toList();
+  }
+
+  void _showRefreshError(BuildContext context, SessionsState state) {
+    if (state is! SessionsLoaded) return;
+    final error = state.refreshError;
+    if (error == null) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(error),
+          action: SnackBarAction(
+            label: 'Retry',
+            onPressed: () => context.read<SessionsCubit>().load(),
+          ),
+        ),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
-    final sessions = _visibleSessions;
+    final cubit = context.read<SessionsCubit>();
 
     return SafeArea(
       bottom: false,
-      child: CustomScrollView(
-        slivers: [
-          const SliverToBoxAdapter(child: AppHeader(subtitle: 'Sessions')),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const EventDateChip(),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Text(
-                        'Sessions',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.secondary,
-                        ),
+      child: BlocConsumer<SessionsCubit, SessionsState>(
+        listener: _showRefreshError,
+        builder: (context, state) {
+          return RefreshIndicator(
+            onRefresh: cubit.load,
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: AppHeader(subtitle: 'Sessions'),
+                ),
+                ...switch (state) {
+                  SessionsLoading() => [
+                    const SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                  ],
+                  SessionsError(:final message) => [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: MessageView(
+                        icon: Icons.cloud_off,
+                        title: 'Couldn\'t load sessions',
+                        message: message,
+                        actionLabel: 'Retry',
+                        onAction: cubit.load,
                       ),
-                      const Spacer(),
-                      Text(
-                        'Showing ${sessions.length} sessions today',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textMuted,
-                        ),
+                    ),
+                  ],
+                  SessionsEmpty() => [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: MessageView(
+                        icon: Icons.event_busy,
+                        title: 'No sessions yet',
+                        message:
+                            'The schedule hasn\'t been published. '
+                            'Check back later.',
+                        actionLabel: 'Refresh',
+                        onAction: cubit.load,
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _SearchField(onChanged: (v) => setState(() => _query = v)),
-                  const SizedBox(height: 12),
-                ],
-              ),
+                    ),
+                  ],
+                  SessionsLoaded(:final sessions) => _loadedSlivers(sessions),
+                },
+              ],
             ),
-          ),
-          SliverToBoxAdapter(
-            child: _FilterChips(
-              selected: _selectedFilter,
-              onSelected: (f) => setState(() => _selectedFilter = f),
-            ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList.separated(
-              itemCount: sessions.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (_, i) => _SessionCard(session: sessions[i]),
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
+  }
+
+  List<Widget> _loadedSlivers(List<Session> sessions) {
+    final filters = _filtersFor(sessions);
+    // The selected hall may disappear after a refresh.
+    if (!filters.contains(_selectedFilter)) _selectedFilter = _allFilter;
+    final visible = _visible(sessions);
+
+    return [
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const EventDateChip(),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  const Text(
+                    'Sessions',
+                    style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'Showing ${visible.length} of ${sessions.length}',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _SearchField(onChanged: (v) => setState(() => _query = v)),
+              const SizedBox(height: 12),
+            ],
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: _FilterChips(
+          filters: filters,
+          selected: _selectedFilter,
+          onSelected: (f) => setState(() => _selectedFilter = f),
+        ),
+      ),
+      if (visible.isEmpty)
+        const SliverFillRemaining(
+          hasScrollBody: false,
+          child: MessageView(
+            icon: Icons.search_off,
+            title: 'No matching sessions',
+            message: 'Try a different search or filter.',
+          ),
+        )
+      else
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList.separated(
+            itemCount: visible.length,
+            separatorBuilder: (_, _) => const SizedBox(height: 12),
+            itemBuilder: (_, i) => _SessionCard(session: visible[i]),
+          ),
+        ),
+    ];
   }
 }
 
@@ -246,7 +231,7 @@ class _SearchField extends StatelessWidget {
     return TextField(
       onChanged: onChanged,
       decoration: InputDecoration(
-        hintText: 'Search session title or speaker...',
+        hintText: 'Search title, speaker or category...',
         hintStyle: const TextStyle(fontSize: 14, color: AppColors.textMuted),
         prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
         filled: true,
@@ -263,8 +248,13 @@ class _SearchField extends StatelessWidget {
 }
 
 class _FilterChips extends StatelessWidget {
-  const _FilterChips({required this.selected, required this.onSelected});
+  const _FilterChips({
+    required this.filters,
+    required this.selected,
+    required this.onSelected,
+  });
 
+  final List<String> filters;
   final String selected;
   final ValueChanged<String> onSelected;
 
@@ -275,10 +265,10 @@ class _FilterChips extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: _filters.length,
+        itemCount: filters.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (_, i) {
-          final filter = _filters[i];
+          final filter = filters[i];
           final isSelected = filter == selected;
           return ChoiceChip(
             label: Text(filter),
@@ -363,7 +353,10 @@ class _SessionCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '${session.speaker} · ${session.speakerRole}',
+                      [
+                        session.speaker,
+                        session.speakerRole,
+                      ].where((t) => t.isNotEmpty).join(' · '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -381,11 +374,13 @@ class _SessionCard extends StatelessWidget {
                 children: [
                   InfoPill(
                     icon: Icons.access_time,
-                    text: formatTimeRange(session.startTime, session.endTime),
+                    text:
+                        '${formatDay(session.startTime)} · '
+                        '${formatTimeRange(session.startTime, session.endTime)}',
                   ),
                   InfoPill(
                     icon: Icons.location_on_outlined,
-                    text: '${session.hall} - ${session.room}',
+                    text: session.location,
                   ),
                 ],
               ),

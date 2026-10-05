@@ -217,7 +217,7 @@ class _TitleSection extends StatelessWidget {
               ),
               InfoPill(
                 icon: Icons.location_on_outlined,
-                text: '${session.hall} - ${session.room}',
+                text: session.location,
               ),
               InfoPill(
                 icon: Icons.calendar_today_outlined,
@@ -275,32 +275,35 @@ class _SpeakerSection extends StatelessWidget {
                         color: AppColors.secondary,
                       ),
                     ),
-                    Text(
-                      session.speakerRole,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.location_on_outlined,
-                          size: 12,
-                          color: AppColors.textMuted,
+                    if (session.speakerRole.isNotEmpty)
+                      Text(
+                        session.speakerRole,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
                         ),
-                        const SizedBox(width: 2),
-                        Text(
-                          session.speakerLocation,
-                          style: const TextStyle(
-                            fontSize: 11,
+                      ),
+                    if (session.speakerLocation.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            size: 12,
                             color: AppColors.textMuted,
                           ),
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 2),
+                          Text(
+                            session.speakerLocation,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -309,15 +312,17 @@ class _SpeakerSection extends StatelessWidget {
               _CircleIconButton(icon: Icons.alternate_email, onPressed: () {}),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            session.speakerBio,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.5,
-              color: AppColors.textMuted,
+          if (session.speakerBio.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Text(
+              session.speakerBio,
+              style: const TextStyle(
+                fontSize: 13,
+                height: 1.5,
+                color: AppColors.textMuted,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -368,7 +373,9 @@ class _AboutSection extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            session.description,
+            session.description.isEmpty
+                ? 'No description available yet.'
+                : session.description,
             style: const TextStyle(
               fontSize: 14,
               height: 1.5,
@@ -429,17 +436,18 @@ class _VenueSection extends StatelessWidget {
           _FloorMap(session: session),
           const SizedBox(height: 12),
           Text(
-            '${session.hall} - ${session.room}',
+            session.location,
             style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
               color: AppColors.secondary,
             ),
           ),
-          Text(
-            session.venue,
-            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-          ),
+          if (session.venue.isNotEmpty)
+            Text(
+              session.venue,
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -486,32 +494,36 @@ class _FloorMap extends StatelessWidget {
                 color: AppColors.primary,
               ),
             ),
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.secondary,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.layers, size: 12, color: Colors.white),
-                    const SizedBox(width: 4),
-                    Text(
-                      session.level,
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
+            if (session.level.isNotEmpty)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.secondary,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.layers, size: 12, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        session.level,
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             Positioned(
               left: 10,
               right: 10,
@@ -536,7 +548,7 @@ class _FloorMap extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${session.room} Direct Entrance',
+                            '${session.room.isEmpty ? session.hall : session.room} Direct Entrance',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w700,

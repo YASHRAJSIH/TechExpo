@@ -9,6 +9,7 @@ import '../utils/date_format.dart';
 import '../widgets/app_header.dart';
 import '../widgets/category_tag.dart';
 import '../widgets/info_pill.dart';
+import '../widgets/message_view.dart';
 import 'session_detail_page.dart';
 
 /// `null` means "All".
@@ -78,14 +79,14 @@ class _BookmarksPageState extends State<BookmarksPage> {
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: all.isEmpty
-                      ? const _EmptyView(
+                      ? const MessageView(
                           icon: Icons.bookmark_border,
                           title: 'No bookmarks yet',
                           message:
                               'Tap the bookmark button on a session '
                               'to save it here.',
                         )
-                      : _EmptyView(
+                      : MessageView(
                           icon: Icons.filter_list_off,
                           title: 'Nothing here',
                           message:
@@ -306,7 +307,10 @@ class _BookmarkCard extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              '${session.speaker} · ${session.speakerRole}',
+                              [
+                                session.speaker,
+                                session.speakerRole,
+                              ].where((t) => t.isNotEmpty).join(' · '),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
@@ -331,7 +335,7 @@ class _BookmarkCard extends StatelessWidget {
                           ),
                           InfoPill(
                             icon: Icons.location_on_outlined,
-                            text: '${session.hall} - ${session.room}',
+                            text: session.location,
                           ),
                         ],
                       ),
@@ -362,7 +366,7 @@ class _StatusBadge extends StatelessWidget {
     )) {
       SessionStatus.live => (
         Icons.circle,
-        'Live now · ${session.room}',
+        'Live now · ${session.room.isEmpty ? session.hall : session.room}',
         AppColors.tertiary,
       ),
       SessionStatus.upcoming
@@ -404,46 +408,6 @@ class _StatusBadge extends StatelessWidget {
               fontWeight: FontWeight.w700,
               color: color,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptyView extends StatelessWidget {
-  const _EmptyView({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
-
-  final IconData icon;
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(32),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 48, color: AppColors.textMuted),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: AppColors.secondary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 13, color: AppColors.textMuted),
           ),
         ],
       ),
